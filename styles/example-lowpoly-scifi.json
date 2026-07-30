@@ -1,0 +1,13 @@
+{
+  "name": "example-lowpoly-scifi",
+  "description": "예시 프리셋 — 웹 게임용 저폴리 SF. 작은 화면에 여러 개가 동시에 뜨는 전제로 폴리곤·텍스처를 낮게 잡는다.",
+  "aiModel": "meshy-6",
+  "topology": "triangle",
+  "targetPolycount": 8000,
+  "shouldRemesh": true,
+  "removeLighting": true,
+  "enablePbr": false,
+  "texturePromptPrefix": "flat matte panels, muted steel and warm amber accents, no baked highlights,",
+  "promptSuffix": ", clean silhouette readable at small size",
+  "targetFormats": ["glb"]
+}
