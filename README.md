@@ -56,6 +56,17 @@ node scripts/gallery.mjs --open                            브라우저에서 �
 node scripts/plugin-sync-check.mjs                         설치 사본이 소스보다 낡았는지
 ```
 
+## 변경을 설치 사본에 반영하려면 버전을 올려라
+
+`claude plugin update` 는 **`.claude-plugin/plugin.json` 의 `version` 이 같으면 "이미 최신"이라며 거부한다**
+— 커밋이 아무리 앞서 있어도 설치 사본은 그대로다(실측: sync-check 는 STALE 인데 update 는 no-op).
+그래서 설치 사본에 반영되어야 하는 변경은 **반드시 `version` 을 함께 올린다**:
+
+```
+claude plugin marketplace update meshy-forge
+claude plugin update meshy-forge@meshy-forge
+```
+
 ## 훅 (둘 다 비차단)
 
 - **PreToolUse** `reuse-guard.mjs` — 생성 직전에 ① 만료 임박 미보관 task ② 유사 보관본을 알린다.

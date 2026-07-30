@@ -35,6 +35,10 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/plugin-sync-check.mjs"
 `claude plugin update meshy-forge@meshy-forge`)을 즉시 실행하고(로컬 스냅샷 갱신 — 사용자 확인 불필요),
 "다음 세션부터 적용"을 알린 뒤 현재 작업은 계속한다.
 
+⚠️ **`update` 는 `plugin.json` 의 `version` 이 같으면 "이미 최신"이라며 아무 일도 하지 않는다.**
+STALE 인데 update 가 no-op 이면 소스 리포의 버전이 안 올라간 것이다 — 그때는 플러그인을 고친 쪽에서
+버전을 올려야 한다(이 리포를 직접 고치는 중이라면 지금 올려라).
+
 그다음 Meshy MCP 연결을 확인한다(`mcp__meshy__*` 가용 여부, 또는 `meshy_check_balance`).
 **미연결이면** 연결을 안내하고 생성은 중단한다 — 보관·검색·갤러리는 연결 없이도 동작한다.
 
