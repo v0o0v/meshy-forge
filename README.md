@@ -29,6 +29,18 @@ claude plugin install meshy-forge@meshy-forge
 node scripts/meshy-cache.mjs setup
 ```
 
+Meshy MCP 서버까지 이 플러그인이 제공하게 하려면 `.mcp.json` 을 만들고 설치 사본을 갱신한다
+(키는 환경변수로만 전달 — 리포에는 절대 커밋되지 않는다):
+
+```
+$env:MESHY_API_KEY = "msy_..."; node scripts/mcp-setup.mjs
+claude plugin marketplace update meshy-forge
+claude plugin update meshy-forge@meshy-forge
+```
+
+기존에 user scope 로 등록된 `meshy` 서버가 있으면 이름이 겹치므로 먼저 제거한다:
+`claude mcp remove meshy --scope user`
+
 `setup` 은 검색 인덱스 백엔드(better-sqlite3 FTS5)를 설치·검증한다.
 Node 메이저 버전을 올린 뒤 인덱스가 죽으면 같은 명령이 `npm rebuild` 로 복구한다.
 
