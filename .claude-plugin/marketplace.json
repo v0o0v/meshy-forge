@@ -1,0 +1,14 @@
+{
+  "name": "meshy-forge",
+  "description": "Meshy 3D 모델 보관·재사용 플러그인 배포 카탈로그.",
+  "owner": {
+    "name": "v0o0v"
+  },
+  "plugins": [
+    {
+      "name": "meshy-forge",
+      "source": "./",
+      "description": "Meshy 생성물은 3일 뒤 서버에서 삭제된다. 만료 전에 로컬로 긁어와 영구 보관하고, 프롬프트로 찾아 재사용하게 만드는 플러그인."
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+# Node
+node_modules/
+
+# 로컬 라이브러리 — GLB 원본·원장·썸네일은 절대 커밋하지 않는다(설계 결정 2026-07-31).
+# 모델 한 건이 10MB 대라 git 히스토리가 되돌릴 수 없이 비대해진다. 유일본이므로 디스크 백업으로만 보호.
+library/
+
+# 파생 SQLite FTS5 인덱스(index.json 으로부터 재빌드 가능)
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+
+# Meshy MCP 설정(project scope). MESHY_API_KEY 가 들어있어 커밋 시 공개 유출.
+# 로컬 디렉터리 마켓플레이스 설치가 이 파일을 설치 사본으로 복사해 플러그인이 MCP 를 함께 제공한다.
+.mcp.json
+
+# 런타임 산출물
+log/
+meshy_output/
+
+# oh-my-claudecode 세션/프로젝트 상태
+.omc/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,9 @@
+{
+  "name": "meshy-forge",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Meshy 3D 모델 로컬 보관·검색 캐시의 SQLite FTS5 파생 인덱스 백엔드 의존 선언(better-sqlite3).",
+  "dependencies": {
+    "better-sqlite3": "^12.11.1"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "_comment": "실제 파일(.mcp.json)은 gitignore 대상이다. scripts/mcp-setup.mjs 로 생성하라 — API 키는 환경변수로만 전달한다.",
+  "mcpServers": {
+    "meshy": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "@meshy-ai/meshy-mcp-server"],
+      "env": { "MESHY_API_KEY": "msy_여기에_키" }
+    }
+  }
+}
