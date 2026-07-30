@@ -44,5 +44,8 @@ const cfg = {
 };
 writeFileSync(dest, JSON.stringify(cfg, null, 2) + '\n');
 console.log(`작성 완료: ${dest} (키 ${key.length}자 — gitignore 대상이라 커밋되지 않습니다)`);
-console.log('플러그인을 재설치/갱신하면 이 파일이 설치 사본으로 복사돼 meshy MCP 가 함께 제공됩니다.');
-console.log('⚠️ 기존에 user scope 로 등록된 meshy 서버가 있으면 이름이 겹칩니다: claude mcp remove meshy --scope user');
+console.log('');
+console.log('설치 사본은 이 파일을 아직 갖고 있지 않습니다. 아래 두 명령으로 다시 복사해야 플러그인이 MCP 를 제공합니다:');
+console.log('  claude plugin marketplace update meshy-forge');
+console.log('  claude plugin update meshy-forge@meshy-forge');
+console.log('(적용은 새 세션부터. 기존에 user scope 로 등록된 meshy 서버가 있으면 이름이 겹치니 먼저 제거: claude mcp remove meshy --scope user)');
