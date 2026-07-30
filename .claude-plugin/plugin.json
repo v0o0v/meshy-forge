@@ -1,7 +1,7 @@
 {
   "name": "meshy-forge",
   "description": "Meshy MCP 위에 얹는 3일 만료 방어 + 로컬 모델 보관·검색 레이어(원장·FTS5 검색·웹 갤러리·미보관 경고 훅).",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "keywords": ["meshy", "3d", "glb", "assets", "library", "retention"],
   "author": {
     "name": "v0o0v"
