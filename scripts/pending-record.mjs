@@ -54,11 +54,13 @@ async function run() {
   let payload = {};
   try { payload = JSON.parse(raw || '{}'); } catch { payload = {}; }
   const toolName = payload.tool_name || payload.toolName || '';
-  if (!/^mcp__meshy__meshy_(text_to_3d|text_to_3d_refine|image_to_3d|multi_image_to_3d|retexture|remesh|rig|animate)/.test(toolName)) return;
+  // MCP 서버 이름은 설치 방식에 따라 달라진다(`mcp__meshy__…` / `mcp__plugin_meshy-forge_meshy__…`).
+  // 접두사를 벗겨 내고 도구 이름만으로 판정한다 — 여기서 어긋나면 훅이 통째로 침묵한다(2026-08-19 사고).
+  const short = toolName.replace(/^mcp__.*?meshy__/, '');
+  if (!/^meshy_(text_to_3d|text_to_3d_refine|image_to_3d|multi_image_to_3d|retexture|remesh|rig|animate)/.test(short)) return;
   const input = payload.tool_input || payload.toolInput || payload.input || {};
   const response = payload.tool_response || payload.toolResponse || payload.response;
 
-  const short = toolName.replace('mcp__meshy__', '');
   const { root } = resolveLibraryRoot();
   const n = recordPending(root, {
     tool: short,
