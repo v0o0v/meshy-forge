@@ -41,7 +41,10 @@ async function run() {
   try { payload = JSON.parse(raw || '{}'); } catch { payload = {}; }
   const toolName = payload.tool_name || payload.toolName || '';
   const input = payload.tool_input || payload.toolInput || payload.input || {};
-  if (!/^mcp__meshy__meshy_(text_to_3d|image_to_3d|multi_image_to_3d|retexture|remesh|rig|animate|creative_lab)/.test(toolName)) return;
+  // MCP 서버 이름은 설치 방식에 따라 달라진다(`mcp__meshy__…` / `mcp__plugin_meshy-forge_meshy__…`).
+  // 접두사를 벗겨 내고 도구 이름만으로 판정한다 — 여기서 어긋나면 훅이 통째로 침묵한다(2026-08-19 사고).
+  const short = toolName.replace(/^mcp__.*?meshy__/, '');
+  if (!/^meshy_(text_to_3d|image_to_3d|multi_image_to_3d|retexture|remesh|rig|animate|creative_lab)/.test(short)) return;
 
   const { root } = resolveLibraryRoot();
 

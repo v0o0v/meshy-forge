@@ -853,6 +853,47 @@ function selftest() {
     const vOff = verifyBackend();
     delete process.env.MESHY_FORGE_FORCE_NO_BACKEND;
     ok('m) verifyBackend 로드+FTS5 스모크', vOk.status === BACKEND_OK && vOff.status === BACKEND_MISSING, `ok=${vOk.status} forced=${vOff.status}`);
+    // (n) 다운로드 훅이 자동 보관한다 — MCP 서버 이름이 플러그인 스코프(mcp__plugin_…_meshy__)여도 걸려야 한다.
+    //     이 접두사 불일치로 훅 3종이 통째로 침묵해 캐릭터 6종이 원장에 안 남은 사고가 있었다(2026-08-19).
+    const autoStore = path.join(PLUGIN_ROOT, 'scripts', 'auto-store.mjs');
+    const rN = subRoot('n');
+    const nGlb = mkGlbFile();
+    const nTask = '9c2d5661-b6d1-41ed-7cae-acae11112222';
+    recordPending(rN, { tool: 'meshy_image_to_3d', taskId: nTask, prompt: 'a brass diving helmet', credits: 30 });
+    const nPayload = JSON.stringify({
+      tool_name: 'mcp__plugin_meshy-forge_meshy__meshy_download_model',
+      tool_input: { task_id: nTask, task_type: 'image-to-3d' },
+      tool_response: { content: [{ type: 'text', text: `{"local_path":"${nGlb.replace(/\\/g, '\\\\')}","file_size_bytes":9}` }] },
+    });
+    const nEnv = { ...process.env, MESHY_FORGE_LIBRARY: rN };
+    const n1 = spawnSync(process.execPath, [autoStore], { input: nPayload, encoding: 'utf8', env: nEnv });
+    const nEnt = loadIndex(rN).entries;
+    ok('n) 다운로드 훅 자동 보관(플러그인 스코프 이름)',
+      n1.status === 0 && nEnt.length === 1 && nEnt[0].prompt === 'a brass diving helmet'
+        && nEnt[0].meshy.taskId === nTask && loadPending(rN).tasks.length === 0,
+      `status=${n1.status} n=${nEnt.length} pending=${loadPending(rN).tasks.length}`);
+    // (o) 같은 task 재다운로드 — 파일명 폴백이 이미 적어 둔 프롬프트·크레딧을 덮으면 안 된다.
+    const o1 = spawnSync(process.execPath, [autoStore], { input: nPayload, encoding: 'utf8', env: nEnv });
+    const oEnt = loadIndex(rN).entries;
+    ok('o) 재다운로드 시 메타 보존',
+      o1.status === 0 && oEnt.length === 1 && oEnt[0].prompt === 'a brass diving helmet' && oEnt[0].meshy.credits === 30,
+      `n=${oEnt.length} prompt="${oEnt[0] && oEnt[0].prompt}" credits=${oEnt[0] && oEnt[0].meshy.credits}`);
+    // (p) 이미지 다운로드·무관 도구는 조용히 지나간다(원장 오염 금지).
+    const rP = subRoot('p');
+    const pEnv = { ...process.env, MESHY_FORGE_LIBRARY: rP };
+    const imgRun = spawnSync(process.execPath, [autoStore], {
+      input: JSON.stringify({
+        tool_name: 'mcp__plugin_meshy-forge_meshy__meshy_download_model',
+        tool_response: { content: [{ type: 'text', text: '{"local_path":"/tmp/preview.png"}' }] },
+      }), encoding: 'utf8', env: pEnv,
+    });
+    const otherRun = spawnSync(process.execPath, [autoStore], {
+      input: JSON.stringify({ tool_name: 'mcp__plugin_meshy-forge_meshy__meshy_check_balance', tool_response: 'ok' }),
+      encoding: 'utf8', env: pEnv,
+    });
+    ok('p) 이미지·무관 도구는 보관 안 함',
+      imgRun.status === 0 && otherRun.status === 0 && loadIndex(rP).entries.length === 0,
+      `status=${imgRun.status}/${otherRun.status} n=${loadIndex(rP).entries.length}`);
   } finally {
     try { closeAll(); } catch { /* ignore */ }
     try { rmSync(tmp, { recursive: true, force: true }); } catch { /* ignore */ }
