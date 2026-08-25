@@ -1,11 +1,11 @@
 {
-  "_comment": "실제 파일(.mcp.json)은 gitignore 대상이다. scripts/mcp-setup.mjs 로 생성하라 — API 키는 환경변수로만 전달한다.",
+  "_comment": "실제 파일(.mcp.json)은 gitignore 대상이다. scripts/mcp-setup.mjs 로 생성하라 — API 키는 환경변수로만 전달한다. 등록하는 것은 업스트림 서버가 아니라 scripts/meshy-proxy.mjs 프록시다(키 여러 개를 하나의 meshy 서버로 묶고, 잔액이 바닥나면 다음 키로 자동 전환한다). 서버 이름 'meshy' 는 바꾸지 마라 — 툴 이름이 바뀌면 hooks.json 의 matcher 가 죽고 자동 보관이 멈춘다. args 의 경로는 이 리포의 실제 절대경로로 바뀐다.",
   "mcpServers": {
     "meshy": {
       "type": "stdio",
-      "command": "cmd",
-      "args": ["/c", "npx", "-y", "@meshy-ai/meshy-mcp-server"],
-      "env": { "MESHY_API_KEY": "msy_여기에_키" }
+      "command": "node",
+      "args": ["<이_리포_절대경로>/scripts/meshy-proxy.mjs"],
+      "env": { "MESHY_API_KEYS": "msy_첫번째_키,msy_두번째_키" }
     }
   }
 }

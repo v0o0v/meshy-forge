@@ -151,4 +151,9 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/meshy-cache.mjs" export --id <id> --to <대�
 - **훅이 조용하면 의심하라.** 생성·다운로드를 했는데 `📥`·`💾` 메시지가 하나도 안 보이면 훅이 안 걸린 것이다
   (MCP 서버 이름이 바뀌면 matcher 가 어긋난다 — 실제로 그 때문에 캐릭터 6종이 통째로 원장에서 누락됐다).
   그럴 땐 `list` 로 확인하고 수동 `store` 로 메운다.
+- **API 키가 여러 개면 프록시가 알아서 넘긴다.** 응답 맨 앞에 `[meshy-forge] key1 잔액 부족 → key2 로 전환`
+  이 보이면 그 시점부터 활성 계정이 바뀐 것이다. 그대로 진행하면 된다 — 다만 **그 이전에 만든 task 는
+  이전 계정 소유**라, 옛 모델을 retexture/remesh 할 때는 원장의 `meshy.keyLabel` 을 근거로 프록시가 되돌려 보낸다.
+  라벨이 비어 있는 엔트리를 발견하면 `node "${CLAUDE_PLUGIN_ROOT}/scripts/backfill-key-label.mjs"` 로 채운다.
+  `meshy_check_balance` 는 키별 잔액과 합계를 함께 보여준다 — 생성 전 예산 판단은 합계가 아니라 **활성 키 잔액**으로 하라.
 - 리깅·애니메이션은 **휴머노이드 전용 카탈로그**다. 게임 고유 연출은 엔진에서 트랜스폼·머티리얼로 저작하는 게 맞다.
