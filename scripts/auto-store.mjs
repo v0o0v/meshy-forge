@@ -18,6 +18,7 @@
 import path from 'path';
 import { existsSync } from 'fs';
 import { resolveLibraryRoot, loadIndex, loadPending, storeEntry, markStored } from './meshy-cache.mjs';
+import { loadState, lookupTask } from './key-state.mjs';
 
 const MODEL_EXT = new Set(['.glb', '.fbx', '.obj', '.usdz', '.stl', '.3mf', '.blend']);
 const UUID_RE = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
@@ -98,6 +99,10 @@ async function run() {
     rec = tasks.find((t) => taskId && t.taskId === taskId) || undefined;
   } catch { /* pending 손상은 보관을 막지 않는다 */ }
 
+  // 복수 키 환경에서만 의미가 있다. 상태 파일이 없거나 매핑이 없으면 undefined 로 두고 넘어간다.
+  let keyLabel;
+  try { keyLabel = lookupTask(loadState(root), taskId); } catch { /* 상태 파일 문제가 보관을 막지 않는다 */ }
+
   const id = makeId(root, file, taskId);
   // 같은 id 를 다시 받는 경우(재다운로드·포맷 변경) 이미 적어 둔 프롬프트·태그를 파일명 폴백으로 덮지 않는다.
   const prev = loadIndex(root).entries.find((e) => e.id === id);
@@ -115,6 +120,9 @@ async function run() {
     meshy: {
       taskId: taskId || (prev && prev.meshy && prev.meshy.taskId),
       taskType: input.task_type || (rec && rec.tool) || (prev && prev.meshy && prev.meshy.taskType),
+      // 어느 키로 만든 task 인지 원장에 박아 둔다. 프록시의 key-state.json 이 날아가도
+      // 보관된 모델은 여기서 소유 키를 되찾아 retexture/remesh 경로가 산다.
+      keyLabel: keyLabel || (prev && prev.meshy && prev.meshy.keyLabel),
       credits: (rec && rec.credits) != null ? rec.credits : (prev && prev.meshy && prev.meshy.credits),
       expiresAt: (rec && rec.expiresAt) || (prev && prev.meshy && prev.meshy.expiresAt),
     },

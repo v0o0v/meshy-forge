@@ -33,9 +33,36 @@ Meshy MCP 서버까지 이 플러그인이 제공하게 하려면 `.mcp.json` �
 (키는 환경변수로만 전달 — 리포에는 절대 커밋되지 않는다):
 
 ```
-$env:MESHY_API_KEY = "msy_..."; node scripts/mcp-setup.mjs
+$env:MESHY_API_KEYS = "msy_첫번째,msy_두번째"; node scripts/mcp-setup.mjs
 claude plugin marketplace update meshy-forge
 claude plugin update meshy-forge@meshy-forge
+```
+
+키가 하나뿐이면 하나만 적어도 된다(`MESHY_API_KEY` 단일 변수도 그대로 받는다).
+
+## 복수 API 키 — 크레딧 풀링
+
+등록되는 MCP 서버는 업스트림이 아니라 `scripts/meshy-proxy.mjs` 프록시다.
+프록시가 키마다 업스트림을 하나씩 상시 띄우고 하나의 `meshy` 서버처럼 보이게 중계한다.
+
+- **서버 이름은 `meshy` 고정.** 바꾸면 툴 이름이 `mcp__meshy-a__…` 가 되어 `hooks/hooks.json` 의
+  `mcp__.*meshy__.*` matcher 가 죽고 **자동 보관이 통째로 멈춘다**(2026-08-19 에 이 형태로 180크레딧을 잃었다).
+- **생성**은 활성 키로 보낸다. 잔액 부족이면 다음 키로 같은 요청을 재시도하고 활성 키를 옮긴 뒤,
+  응답 맨 앞에 `[meshy-forge] key1 잔액 부족 → key2 로 전환` 한 줄을 붙인다.
+- **task 는 계정에 귀속된다.** `input_task_id`·`task_id` 가 있는 호출은 그 task 를 만든 키로 라우팅한다.
+  매핑은 `library/key-state.json` 에, 보관된 모델은 원장의 `meshy.keyLabel` 에 남는다(키 값이 아니라 라벨만).
+- `meshy_check_balance` 는 모든 키를 조회해 키별 잔액과 합계를 함께 보여준다.
+
+옛 원장에 라벨을 채우려면(도입 전 보관분은 전부 첫 키 소유다):
+
+```
+node scripts/backfill-key-label.mjs
+```
+
+폴백 동작을 크레딧 없이 확인하려면:
+
+```
+node test/proxy.test.mjs
 ```
 
 기존에 user scope 로 등록된 `meshy` 서버가 있으면 이름이 겹치므로 먼저 제거한다:

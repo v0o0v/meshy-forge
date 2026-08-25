@@ -301,6 +301,10 @@ export function storeEntry(root, opts) {
       previewTaskId: meshy.previewTaskId || undefined,
       sourceTaskId: meshy.sourceTaskId || undefined,
       taskType: meshy.taskType || undefined,
+      // 어느 API 키(계정)로 만들었는지. task 는 계정에 귀속되므로 이 값이 없으면
+      // 복수 키 환경에서 input_task_id 기반 retexture/remesh 를 어느 키로 보낼지 알 수 없다.
+      // 키 값이 아니라 라벨(key1/key2)만 적는다 — 원장은 평문이다.
+      keyLabel: meshy.keyLabel || undefined,
       credits: meshy.credits != null ? Number(meshy.credits) : undefined,
       // 서버 보관 만료 — 이 시각을 넘기면 원본 재다운로드도, input_task_id 기반 변형도 불가능하다.
       expiresAt: meshy.expiresAt || expiryOf(createdAt) || undefined,
