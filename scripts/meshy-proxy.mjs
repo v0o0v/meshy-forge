@@ -19,9 +19,16 @@
  *
  * 잔액 부족 감지(업스트림 0.4.0 소스 확인 결과):
  *   JSON-RPC `error` 로 오지 않는다. 성공 응답 안에 `isError: true` 와
- *   텍스트 `"Error: Insufficient credits. ..."` 로 온다(dist/services/error-handler.js).
+ *   오류 텍스트로 온다(dist/services/error-handler.js).
  *   그래서 error 필드가 아니라 **result 본문**을 본다. 접두 정확 매칭이라
  *   check_balance 응답의 "credit" 같은 단어에는 걸리지 않는다.
+ *
+ *   **문구는 버전마다 다르다.** 실측 두 가지를 다 받는다:
+ *     0.4.0  "Error: Insufficient credits. Use `meshy_check_balance` ..."
+ *     이후   "Error: API request failed with status 402. Insufficient funds"
+ *   2026-08-26 에 뒤엣것을 못 알아봐 전환이 안 됐고, 사용자에게는 그냥 402 에러로
+ *   보였다(캐릭터 3D 9건이 여기서 멈춰 REST 우회로 돌았다). 새 문구가 또 나오면
+ *   여기 정규식과 test/mock-upstream.mjs 의 MOCK_INSUFFICIENT_STYLE 에 같이 추가한다.
  *
  * 환경변수:
  *   MESHY_API_KEYS       "msy_a,msy_b" (콤마 구분). 없으면 MESHY_API_KEY 단일 키(하위호환).
@@ -148,7 +155,15 @@ function childByLabel(label) {
 
 // ── 잔액 부족 감지 · 응답 가공 ────────────────────────────────────────────
 
-const INSUFFICIENT_RE = /^Error:\s*Insufficient credits\./m;
+/**
+ * 잔액 부족 문구는 업스트림 버전마다 다르다. 실측 두 가지를 다 받는다:
+ *   0.4.0  "Error: Insufficient credits. Use `meshy_check_balance` ..."
+ *   이후   "Error: API request failed with status 402. Insufficient funds"
+ * 접두 `Error:` 를 요구해 check_balance 본문의 "credit" 같은 단어에는 안 걸린다.
+ */
+const INSUFFICIENT_RE = /^Error:\s*(?:Insufficient (?:credits|funds)|API request failed with status 402)/m;
+/** JSON-RPC error 경로는 SDK 문구가 접두를 덮으므로 문면만 본다. */
+const INSUFFICIENT_LOOSE_RE = /Insufficient (?:credits|funds)|status 402/i;
 
 function resultText(res) {
   const content = res && res.result && Array.isArray(res.result.content) ? res.result.content : [];
@@ -156,7 +171,9 @@ function resultText(res) {
 }
 
 function isInsufficient(res) {
-  if (!res || !res.result || res.result.isError !== true) return false;
+  if (!res) return false;
+  if (res.error && typeof res.error.message === 'string') return INSUFFICIENT_LOOSE_RE.test(res.error.message);
+  if (!res.result || res.result.isError !== true) return false;
   return INSUFFICIENT_RE.test(resultText(res));
 }
 

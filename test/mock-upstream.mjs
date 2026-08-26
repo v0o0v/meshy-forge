@@ -4,7 +4,10 @@
  *
  * 진짜 키를 소진시키지 않고 폴백 경로를 검증하기 위한 것이다.
  * 응답 모양은 업스트림 0.4.0 소스에서 그대로 베꼈다:
- *   - 잔액 부족은 JSON-RPC error 가 아니라 `isError: true` + "Error: Insufficient credits." 텍스트
+ *   - 잔액 부족은 JSON-RPC error 가 아니라 `isError: true` + 오류 텍스트.
+ *     문구는 업스트림 버전마다 다르다 — MOCK_INSUFFICIENT_STYLE_<키> 로 고른다:
+ *       credits (기본) "Error: Insufficient credits. ..."      (0.4.0)
+ *       402            "Error: API request failed with status 402. Insufficient funds" (2026-08 실측)
  *   - task 생성 응답은 markdown 본문에 "**Task ID**: <id>" 와 structuredContent.task_id
  *   - task 는 계정 귀속이라 남의 task 를 조회하면 NotFound
  *
@@ -14,6 +17,10 @@ const KEY = process.env.MESHY_API_KEY || '';
 const BALANCE = Number(process.env[`MOCK_BALANCE_${KEY}`] ?? 0);
 /** 이 모의 서버가 소유한 task 들 — 자기가 만든 것만 조회에 성공한다. */
 const owned = new Set((process.env[`MOCK_OWNED_${KEY}`] || '').split(',').filter(Boolean));
+/** 잔액 부족 문구 — 업스트림 버전 차이를 재현한다. */
+const INSUFFICIENT_TEXT = (process.env[`MOCK_INSUFFICIENT_STYLE_${KEY}`] || 'credits') === '402'
+  ? 'Error: API request failed with status 402. Insufficient funds'
+  : 'Error: Insufficient credits. Use `meshy_check_balance` to check your balance. Upgrade at https://meshy.ai/pricing';
 let seq = 0;
 
 function send(msg) { process.stdout.write(JSON.stringify(msg) + '\n'); }
@@ -47,7 +54,7 @@ function handle(msg) {
   }
   // 생성 계열 — 잔액이 없으면 업스트림과 같은 문구로 거절한다.
   if (BALANCE <= 0) {
-    fail(id, 'Error: Insufficient credits. Use `meshy_check_balance` to check your balance. Upgrade at https://meshy.ai/pricing');
+    fail(id, INSUFFICIENT_TEXT);
     return;
   }
   const taskId = `${KEY}-task-${++seq}`;
